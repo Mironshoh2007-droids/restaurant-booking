@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Бронирование столиков</title>
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        .container { max-width: 800px; margin: auto; }
+        table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .form-group { margin-bottom: 10px; }
+        label { display: inline-block; width: 120px; }
+        button { margin-top: 10px; padding: 5px 10px; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Бронирование столиков в ресторане</h1>
+
+    <h2>Поиск свободных столиков</h2>
+    <div class="form-group">
+        <label>Дата:</label>
+        <input type="date" id="date" value="2026-03-25">
+    </div>
+    <div class="form-group">
+        <label>Время:</label>
+        <input type="time" id="time" value="19:00">
+    </div>
+    <button onclick="searchTables()">Найти</button>
+    <div id="tables-result"></div>
+
+    <h2>Забронировать столик</h2>
+    <div class="form-group">
+        <label>ID столика:</label>
+        <input type="number" id="book-table-id">
+    </div>
+    <div class="form-group">
+        <label>Ваше имя:</label>
+        <input type="text" id="customer-name">
+    </div>
+    <div class="form-group">
+        <label>Телефон:</label>
+        <input type="text" id="phone">
+    </div>
+    <div class="form-group">
+        <label>Дата:</label>
+        <input type="date" id="book-date" value="2026-03-25">
+    </div>
+    <div class="form-group">
+        <label>Время:</label>
+        <input type="time" id="book-time" value="19:00">
+    </div>
+    <button onclick="bookTable()">Забронировать</button>
+    <div id="book-result"></div>
+
+    <h2>Отменить бронирование</h2>
+    <div class="form-group">
+        <label>Телефон:</label>
+        <input type="text" id="cancel-phone">
+    </div>
+    <button onclick="cancelBooking()">Отменить</button>
+    <div id="cancel-result"></div>
+</div>
+
+<script>
+    async function searchTables() {
+        const date = document.getElementById('date').value;
+        const time = document.getElementById('time').value;
+        const res = await fetch(`/api/tables?date=${date}&time=${time}`);
+        const tables = await res.json();
+        const html = `<h3>Свободные столики на ${date} ${time}</h3>
+                      <table border="1">\
+                      <tr><th>ID</th><th>Номер</th><th>Мест</th><th>Расположение</th></tr>
+                      ${tables.map(t => `<tr><td>${t.id}</td><td>${t.number}</td><td>${t.seats}</td><td>${t.location}</td></tr>`).join('')}
+                      </table>`;
+        document.getElementById('tables-result').innerHTML = html;
+    }
+
+    async function bookTable() {
+        const data = {
+            table_id: parseInt(document.getElementById('book-table-id').value),
+            customer_name: document.getElementById('customer-name').value,
+            phone: document.getElementById('phone').value,
+            date: document.getElementById('book-date').value,
+            time: document.getElementById('book-time').value
+        };
+        const res = await fetch('/api/book', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        });
+        const result = await res.json();
+        const div = document.getElementById('book-result');
+        if (res.ok) {
+            div.innerHTML = `<span class="success">Бронь создана! ID: ${result.booking_id}</span>`;
+        } else {
+            div.innerHTML = `<span class="error">Ошибка: ${result.error}</span>`;
+        }
+    }
+
+    async function cancelBooking() {
+        const phone = document.getElementById('cancel-phone').value;
+        const res = await fetch('/api/cancel', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({phone})
+        });
+        const result = await res.json();
+        const div = document.getElementById('cancel-result');
+        if (res.ok) {
+            div.innerHTML = `<span class="success">${result.message}</span>`;
+        } else {
+            div.innerHTML = `<span class="error">Ошибка: ${result.error}</span>`;
+        }
+    }
+</script>
+</body>
+</html>
