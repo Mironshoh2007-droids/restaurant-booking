@@ -2,121 +2,591 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Бронирование столиков</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Ресторан «Уют» — Бронирование столиков</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: Arial; margin: 20px; }
-        .container { max-width: 800px; margin: auto; }
-        table { border-collapse: collapse; width: 100%; margin-top: 10px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        .form-group { margin-bottom: 10px; }
-        label { display: inline-block; width: 120px; }
-        button { margin-top: 10px; padding: 5px 10px; }
-        .success { color: green; }
-        .error { color: red; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #2c1a1a 0%, #4a2a2a 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        /* Hero banner – новый градиент */
+        .hero {
+            max-width: 1400px;
+            margin: 0 auto 2rem auto;
+            background: linear-gradient(135deg, #732222, #9B2C2C);
+            border-radius: 2rem;
+            overflow: hidden;
+            box-shadow: 0 20px 35px -10px rgba(0,0,0,0.2);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .hero-image { flex: 1; min-width: 250px; }
+        .hero-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .hero-text { flex: 1; padding: 2rem; color: white; text-align: center; }
+        .hero-text h2 { font-size: 2.5rem; margin-bottom: 0.5rem; font-weight: 700; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .hero-text p { font-size: 1.2rem; opacity: 0.9; }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 248, 245, 0.98);
+            border-radius: 2rem;
+            padding: 2rem;
+            box-shadow: 0 20px 35px -10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #732222, #9B2C2C);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
+        .subtitle {
+            color: #6c4f4f;
+            font-size: 1rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid #9B2C2C;
+            padding-left: 1rem;
+        }
+
+        /* Фильтры */
+        .filters-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            align-items: center;
+            background: #fff0ed;
+            padding: 1rem;
+            border-radius: 1rem;
+        }
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .filter-group label {
+            font-weight: 500;
+            color: #732222;
+        }
+        select, button {
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            border: 1px solid #ced4da;
+            background: white;
+            font-family: inherit;
+            cursor: pointer;
+        }
+        .view-toggle {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .view-toggle button {
+            background: #e9ecef;
+            border: none;
+        }
+        .view-toggle button.active {
+            background: #9B2C2C;
+            color: white;
+        }
+        button#search-btn {
+            background: #9B2C2C;
+            color: white;
+            border: none;
+        }
+        button#search-btn:hover {
+            background: #B84C4C;
+        }
+
+        /* Карточки столиков (сетка) */
+        .tables-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+        .table-card {
+            background: white;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .table-card:hover {
+            transform: translateY(-4px);
+        }
+        .table-card.free {
+            border-color: #9B2C2C;
+        }
+        .table-card.busy {
+            border-color: #ccc;
+            opacity: 0.7;
+            filter: grayscale(0.2);
+        }
+        .table-card.selected {
+            border-color: #B84C4C;
+            box-shadow: 0 8px 20px rgba(155,44,44,0.3);
+            transform: scale(1.02);
+        }
+        .table-image {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+        }
+        .table-info {
+            padding: 1rem;
+        }
+        .table-number {
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 0.3rem;
+            color: #732222;
+        }
+        .table-details {
+            font-size: 0.85rem;
+            color: #6c4f4f;
+            margin-bottom: 0.5rem;
+        }
+        .status-text {
+            font-size: 0.8rem;
+            font-weight: 500;
+            padding: 0.2rem 0.5rem;
+            border-radius: 1rem;
+            display: inline-block;
+        }
+        .free .status-text {
+            background: #f8e1e1;
+            color: #9B2C2C;
+        }
+        .busy .status-text {
+            background: #e9ecef;
+            color: #6c757d;
+        }
+
+        /* Панель бронирования */
+        .booking-panel {
+            background: #fff0ed;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+        }
+        .booking-panel h2 {
+            color: #732222;
+            margin-bottom: 1rem;
+        }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; font-weight: 500; margin-bottom: 0.3rem; color: #732222; }
+        .form-group input { width: 100%; padding: 0.75rem; border: 1px solid #ced4da; border-radius: 0.75rem; font-family: inherit; transition: 0.2s; }
+        .form-group input:focus { outline: none; border-color: #9B2C2C; box-shadow: 0 0 0 3px rgba(155,44,44,0.1); }
+        button {
+            background: #9B2C2C;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            width: 100%;
+            font-size: 1rem;
+        }
+        button:hover {
+            background: #B84C4C;
+            transform: translateY(-1px);
+        }
+        .cancel-btn {
+            background: #e74c3c;
+            margin-top: 0.5rem;
+        }
+        .cancel-btn:hover {
+            background: #c0392b;
+        }
+        .message { margin-top: 1rem; padding: 0.75rem; border-radius: 1rem; font-size: 0.9rem; }
+        .success { background: #d4edda; color: #155724; border-left: 4px solid #28a745; }
+        .error { background: #f8d7da; color: #721c24; border-left: 4px solid #dc3545; }
+        hr { margin: 1.5rem 0; border: none; height: 1px; background: #e0c8c8; }
+
+        @media (max-width: 800px) {
+            body { padding: 1rem; }
+            .container { padding: 1rem; }
+            .dashboard { flex-direction: column; }
+            .tables-grid { grid-template-columns: 1fr; }
+            .hero-text h2 { font-size: 1.8rem; }
+        }
     </style>
 </head>
 <body>
+
+<div class="hero">
+    <div class="hero-image">
+        <img src="https://avatars.mds.yandex.net/get-vertis-journal/4465444/7833c4d0-8673-482d-814f-4bb1449fca1f.jpeg/1600x1600" alt="Ресторан Уют">
+    </div>
+    <div class="hero-text">
+        <h2>Добро пожаловать на сайт ресторана «Уют»</h2>
+        <p>Забронируйте столик онлайн — быстро, удобно, без очередей</p>
+    </div>
+</div>
+
 <div class="container">
-    <h1>Бронирование столиков в ресторане</h1>
+    <h1>🍽️ Ресторан «Уют» — Бронирование столиков</h1>
+    <div class="subtitle">Выберите свободный столик (бордовая рамка) и забронируйте</div>
 
-    <h2>Поиск свободных столиков</h2>
-    <div class="form-group">
-        <label>Дата:</label>
-        <input type="date" id="date" value="2026-03-25">
+    <!-- Фильтры и сортировка -->
+    <div class="filters-bar">
+        <div class="filter-group">
+            <label>Зал:</label>
+            <select id="hall-filter">
+                <option value="all">Все залы</option>
+                <option value="Основной зал">Основной зал</option>
+                <option value="Второй зал">Второй зал</option>
+                <option value="Вип-зал">Вип-зал</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Статус:</label>
+            <select id="status-filter">
+                <option value="all">Все</option>
+                <option value="free">Свободные</option>
+                <option value="busy">Занятые</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Сортировать:</label>
+            <select id="sort-by">
+                <option value="number">По номеру</option>
+                <option value="seats">По местам</option>
+            </select>
+        </div>
+        <div class="view-toggle">
+            <button id="list-view-btn" class="active">Список</button>
+            <button id="schema-view-btn">Схема</button>
+        </div>
+        <button id="search-btn">🔍 Обновить</button>
     </div>
-    <div class="form-group">
-        <label>Время:</label>
-        <input type="time" id="time" value="19:00">
-    </div>
-    <button onclick="searchTables()">Найти</button>
-    <div id="tables-result"></div>
 
-    <h2>Забронировать столик</h2>
-    <div class="form-group">
-        <label>ID столика:</label>
-        <input type="number" id="book-table-id">
+    <!-- Контейнер для столиков -->
+    <div id="tables-container" class="tables-grid">
+        Загрузка...
     </div>
-    <div class="form-group">
-        <label>Ваше имя:</label>
-        <input type="text" id="customer-name">
-    </div>
-    <div class="form-group">
-        <label>Телефон:</label>
-        <input type="text" id="phone">
-    </div>
-    <div class="form-group">
-        <label>Дата:</label>
-        <input type="date" id="book-date" value="2026-03-25">
-    </div>
-    <div class="form-group">
-        <label>Время:</label>
-        <input type="time" id="book-time" value="19:00">
-    </div>
-    <button onclick="bookTable()">Забронировать</button>
-    <div id="book-result"></div>
 
-    <h2>Отменить бронирование</h2>
-    <div class="form-group">
-        <label>Телефон:</label>
-        <input type="text" id="cancel-phone">
+    <!-- Панель бронирования -->
+    <div class="booking-panel">
+        <h2>📅 Бронирование</h2>
+        <div class="selected-table-info" id="selected-table-info">Столик не выбран</div>
+        <div class="form-group">
+            <label>Ваше имя</label>
+            <input type="text" id="customer-name" placeholder="Иван">
+        </div>
+        <div class="form-group">
+            <label>Телефон</label>
+            <input type="text" id="phone" placeholder="+7 999 123-45-67">
+        </div>
+        <div class="form-group">
+            <label>Дата брони</label>
+            <input type="date" id="book-date" value="2026-03-25">
+        </div>
+        <div class="form-group">
+            <label>Время брони</label>
+            <input type="time" id="book-time" value="20:00">
+        </div>
+        <button id="book-btn">✅ Забронировать выбранный столик</button>
+        <div id="book-message" class="message"></div>
+
+        <hr>
+
+        <h2>❌ Отменить бронирование по коду</h2>
+        <div class="form-group">
+            <label>Код безопасности:</label>
+            <input type="text" id="cancel-code" placeholder="Введите 6-значный код">
+        </div>
+        <button id="cancel-by-code-btn" class="cancel-btn">Отменить по коду</button>
+        <div id="cancel-code-message" class="message"></div>
     </div>
-    <button onclick="cancelBooking()">Отменить</button>
-    <div id="cancel-result"></div>
 </div>
 
 <script>
-    async function searchTables() {
-        const date = document.getElementById('date').value;
-        const time = document.getElementById('time').value;
-        const res = await fetch(`/api/tables?date=${date}&time=${time}`);
-        const tables = await res.json();
-        const html = `<h3>Свободные столики на ${date} ${time}</h3>
-                      <table border="1">\
-                      <tr><th>ID</th><th>Номер</th><th>Мест</th><th>Расположение</th></tr>
-                      ${tables.map(t => `<tr><td>${t.id}</td><td>${t.number}</td><td>${t.seats}</td><td>${t.location}</td></tr>`).join('')}
-                      </table>`;
-        document.getElementById('tables-result').innerHTML = html;
+    const BASE_URL = window.location.origin;
+
+    let allTables = [];          // полный список столиков (с полями)
+    let currentFreeIds = new Set(); // ID свободных столиков для выбранной даты/времени
+    let currentSelectedTable = null;
+    let currentView = 'list';    // 'list' или 'schema'
+
+    const tablesContainer = document.getElementById('tables-container');
+    const hallFilter = document.getElementById('hall-filter');
+    const statusFilter = document.getElementById('status-filter');
+    const sortBy = document.getElementById('sort-by');
+    const searchBtn = document.getElementById('search-btn');
+    const listViewBtn = document.getElementById('list-view-btn');
+    const schemaViewBtn = document.getElementById('schema-view-btn');
+
+    const selectedInfo = document.getElementById('selected-table-info');
+    const bookDateInput = document.getElementById('book-date');
+    const bookTimeInput = document.getElementById('book-time');
+    const customerNameInput = document.getElementById('customer-name');
+    const phoneInput = document.getElementById('phone');
+    const bookMessageDiv = document.getElementById('book-message');
+    const cancelCodeMessageDiv = document.getElementById('cancel-code-message');
+
+    // Получить список всех столиков (с картинками)
+    async function fetchAllTables() {
+        try {
+            const res = await fetch(`${BASE_URL}/api/tables`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            return await res.json();
+        } catch (err) {
+            console.error(err);
+            return [];
+        }
+    }
+
+    // Получить свободные столики на дату/время
+    async function fetchFreeTables(date, time) {
+        try {
+            const res = await fetch(`${BASE_URL}/api/tables?date=${date}&time=${time}`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            return await res.json();
+        } catch (err) {
+            console.error(err);
+            return [];
+        }
+    }
+
+    // Загрузить все данные и обновить интерфейс
+    async function loadData() {
+        const date = document.getElementById('date')?.value || new Date().toISOString().slice(0,10);
+        const time = document.getElementById('time')?.value || '19:00';
+        const freeTables = await fetchFreeTables(date, time);
+        currentFreeIds = new Set(freeTables.map(t => t.id));
+        allTables = await fetchAllTables();
+        renderFilteredAndSorted();
+    }
+
+    // Применяет фильтры, сортировку и отрисовывает
+    function renderFilteredAndSorted() {
+        let filtered = [...allTables];
+
+        // Фильтр по залу
+        const hall = hallFilter.value;
+        if (hall !== 'all') {
+            filtered = filtered.filter(t => t.hall === hall);
+        }
+
+        // Фильтр по статусу
+        const status = statusFilter.value;
+        if (status === 'free') {
+            filtered = filtered.filter(t => currentFreeIds.has(t.id));
+        } else if (status === 'busy') {
+            filtered = filtered.filter(t => !currentFreeIds.has(t.id));
+        }
+
+        // Сортировка
+        const sort = sortBy.value;
+        filtered.sort((a, b) => {
+            if (sort === 'number') return a.number.localeCompare(b.number, undefined, { numeric: true });
+            if (sort === 'seats') return a.seats - b.seats;
+            return 0;
+        });
+
+        // Добавляем поле available для каждой записи
+        const tablesWithStatus = filtered.map(t => ({
+            ...t,
+            available: currentFreeIds.has(t.id)
+        }));
+
+        if (currentView === 'list') {
+            renderListView(tablesWithStatus);
+        } else {
+            renderSchemaView(tablesWithStatus);
+        }
+    }
+
+    // Отрисовка списком (с фото)
+    function renderListView(tables) {
+        if (!tables.length) {
+            tablesContainer.innerHTML = '<div style="text-align:center; padding:2rem;">Нет столиков, соответствующих фильтрам</div>';
+            return;
+        }
+        let html = '';
+        for (const t of tables) {
+            const statusClass = t.available ? 'free' : 'busy';
+            const selectedClass = (currentSelectedTable && currentSelectedTable.id === t.id) ? 'selected' : '';
+            html += `
+                <div class="table-card ${statusClass} ${selectedClass}" data-id="${t.id}" data-available="${t.available}">
+                    <img class="table-image" src="${t.image || 'https://via.placeholder.com/280x160?text=Стол'}" alt="Стол ${t.number}">
+                    <div class="table-info">
+                        <div class="table-number">Стол ${t.number}</div>
+                        <div class="table-details">🍴 ${t.seats} места · ${t.location}</div>
+                        <div class="table-details">🏷️ ${t.hall}</div>
+                        <div class="status-text">${t.available ? '🟢 Свободен' : '🔴 Занят'}</div>
+                    </div>
+                </div>
+            `;
+        }
+        tablesContainer.innerHTML = html;
+        attachCardEvents();
+    }
+
+    // Отрисовка схемой (компактные карточки)
+    function renderSchemaView(tables) {
+        if (!tables.length) {
+            tablesContainer.innerHTML = '<div style="text-align:center; padding:2rem;">Нет столиков, соответствующих фильтрам</div>';
+            return;
+        }
+        let html = '<div style="display: flex; flex-wrap: wrap; gap: 1rem;">';
+        for (const t of tables) {
+            const statusClass = t.available ? 'free' : 'busy';
+            const selectedClass = (currentSelectedTable && currentSelectedTable.id === t.id) ? 'selected' : '';
+            html += `
+                <div class="table-card ${statusClass} ${selectedClass}" style="width: 200px;" data-id="${t.id}" data-available="${t.available}">
+                    <img class="table-image" src="${t.image || 'https://via.placeholder.com/200x120?text=Стол'}" alt="Стол ${t.number}" style="height: 120px;">
+                    <div class="table-info">
+                        <div class="table-number">Стол ${t.number}</div>
+                        <div class="table-details">${t.seats} места</div>
+                        <div class="status-text">${t.available ? '🟢' : '🔴'}</div>
+                    </div>
+                </div>
+            `;
+        }
+        html += '</div>';
+        tablesContainer.innerHTML = html;
+        attachCardEvents();
+    }
+
+    function attachCardEvents() {
+        document.querySelectorAll('.table-card').forEach(card => {
+            const isAvailable = card.getAttribute('data-available') === 'true';
+            if (!isAvailable) return;
+            card.addEventListener('click', (e) => {
+                const id = parseInt(card.getAttribute('data-id'));
+                const tableData = allTables.find(t => t.id === id);
+                if (tableData) {
+                    selectTable(tableData);
+                }
+            });
+        });
+    }
+
+    function selectTable(table) {
+        currentSelectedTable = table;
+        selectedInfo.innerHTML = `✅ Выбран: Стол ${table.number} (${table.seats} места, ${table.location})`;
+        bookMessageDiv.innerHTML = '';
     }
 
     async function bookTable() {
-        const data = {
-            table_id: parseInt(document.getElementById('book-table-id').value),
-            customer_name: document.getElementById('customer-name').value,
-            phone: document.getElementById('phone').value,
-            date: document.getElementById('book-date').value,
-            time: document.getElementById('book-time').value
-        };
-        const res = await fetch('/api/book', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(data)
-        });
-        const result = await res.json();
-        const div = document.getElementById('book-result');
-        if (res.ok) {
-            div.innerHTML = `<span class="success">Бронь создана! ID: ${result.booking_id}</span>`;
-        } else {
-            div.innerHTML = `<span class="error">Ошибка: ${result.error}</span>`;
+        if (!currentSelectedTable) {
+            bookMessageDiv.innerHTML = '<div class="message error">Сначала выберите столик на схеме!</div>';
+            return;
+        }
+        const table_id = currentSelectedTable.id;
+        const customer_name = customerNameInput.value.trim();
+        const phone = phoneInput.value.trim();
+        const date = bookDateInput.value;
+        const time = bookTimeInput.value;
+
+        if (!customer_name || !phone || !date || !time) {
+            bookMessageDiv.innerHTML = '<div class="message error">Заполните все поля (имя, телефон, дату, время)</div>';
+            return;
+        }
+        const data = { table_id, customer_name, phone, date, time };
+        try {
+            const res = await fetch(`${BASE_URL}/api/book`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await res.json();
+            if (res.ok) {
+                alert(`🔔 Ваш код безопасности: ${result.code}. Сохраните его для отмены брони.`);
+                bookMessageDiv.innerHTML = `<div class="message success">✅ Бронь создана! ID: ${result.booking_id}. Код: ${result.code}</div>`;
+                customerNameInput.value = '';
+                phoneInput.value = '';
+                await loadData(); // перезагрузить данные (обновить занятость)
+                currentSelectedTable = null;
+                selectedInfo.innerHTML = `❌ Столик не выбран`;
+            } else {
+                bookMessageDiv.innerHTML = `<div class="message error">❌ Ошибка: ${result.error}</div>`;
+            }
+        } catch (err) {
+            bookMessageDiv.innerHTML = `<div class="message error">❌ Ошибка подключения: ${err.message}</div>`;
         }
     }
 
-    async function cancelBooking() {
-        const phone = document.getElementById('cancel-phone').value;
-        const res = await fetch('/api/cancel', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({phone})
-        });
-        const result = await res.json();
-        const div = document.getElementById('cancel-result');
-        if (res.ok) {
-            div.innerHTML = `<span class="success">${result.message}</span>`;
-        } else {
-            div.innerHTML = `<span class="error">Ошибка: ${result.error}</span>`;
+    async function cancelByCode() {
+        const code = document.getElementById('cancel-code').value.trim();
+        if (!code) {
+            alert('Введите код безопасности');
+            return;
+        }
+        try {
+            const res = await fetch(`${BASE_URL}/api/cancel_by_code`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code })
+            });
+            const result = await res.json();
+            if (res.ok) {
+                cancelCodeMessageDiv.innerHTML = `<div class="message success">✅ ${result.message}</div>`;
+                document.getElementById('cancel-code').value = '';
+                await loadData();
+            } else {
+                cancelCodeMessageDiv.innerHTML = `<div class="message error">❌ ${result.error}</div>`;
+            }
+        } catch (err) {
+            cancelCodeMessageDiv.innerHTML = `<div class="message error">❌ Ошибка: ${err.message}</div>`;
         }
     }
+
+    // Управление видом
+    function setView(view) {
+        currentView = view;
+        if (view === 'list') {
+            listViewBtn.classList.add('active');
+            schemaViewBtn.classList.remove('active');
+        } else {
+            listViewBtn.classList.remove('active');
+            schemaViewBtn.classList.add('active');
+        }
+        renderFilteredAndSorted();
+    }
+
+    // Обработчики
+    searchBtn.addEventListener('click', loadData);
+    hallFilter.addEventListener('change', renderFilteredAndSorted);
+    statusFilter.addEventListener('change', renderFilteredAndSorted);
+    sortBy.addEventListener('change', renderFilteredAndSorted);
+    listViewBtn.addEventListener('click', () => setView('list'));
+    schemaViewBtn.addEventListener('click', () => setView('schema'));
+    document.getElementById('book-btn').addEventListener('click', bookTable);
+    document.getElementById('cancel-by-code-btn').addEventListener('click', cancelByCode);
+
+    // Добавляем поля даты/времени для фильтрации
+    if (!document.getElementById('date')) {
+        const hiddenDate = document.createElement('input');
+        hiddenDate.type = 'hidden';
+        hiddenDate.id = 'date';
+        hiddenDate.value = new Date().toISOString().slice(0,10);
+        document.body.appendChild(hiddenDate);
+    }
+    if (!document.getElementById('time')) {
+        const hiddenTime = document.createElement('input');
+        hiddenTime.type = 'hidden';
+        hiddenTime.id = 'time';
+        hiddenTime.value = '19:00';
+        document.body.appendChild(hiddenTime);
+    }
+
+    loadData();
 </script>
 </body>
-</html>
+</html> 
