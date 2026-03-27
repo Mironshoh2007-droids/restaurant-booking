@@ -147,7 +147,7 @@ def static_files(path):
 
 if __name__ == '__main__':
     print("\n" + "=" * 50)
-    print("Сервер запущен!")
+    print("Сервер запущен!!")
     print("Основной сайт: http://127.0.0.1:5000")
     print("Админка: http://127.0.0.1:5000/admin (логин: admin, пароль: admin123)")
     print("=" * 50 + "\n")
